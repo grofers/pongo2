@@ -82,6 +82,12 @@ func (v *Value) IsNil() bool {
 	return !v.getResolvedValue().IsValid()
 }
 
+// IsMap checks whether the underlying value is a map from string
+func (v *Value) IsMap() bool {
+	val := v.getResolvedValue()
+	return val.Kind() == reflect.Map && val.Type().Key().Kind() == reflect.String
+}
+
 // String returns a string for the underlying value. If this value is not
 // of type string, pongo2 tries to convert it. Currently the following
 // types for underlying values are supported:
@@ -182,6 +188,18 @@ func (v *Value) Bool() bool {
 	default:
 		logf("Value.Bool() not available for type: %s\n", v.getResolvedValue().Kind().String())
 		return false
+	}
+}
+
+func (v *Value) MapIndex(key string) *Value {
+	switch v.getResolvedValue().Kind() {
+	case reflect.Map:
+		return &Value{
+			val: v.getResolvedValue().MapIndex(reflect.ValueOf(key)),
+		}
+	default:
+		logf("Value.MapIndex() not available for type: %s\n", v.getResolvedValue().Kind().String())
+		return AsValue(nil)
 	}
 }
 

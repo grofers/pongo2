@@ -91,6 +91,7 @@ func init() {
 	RegisterFilter("wordcount", filterWordcount)
 	RegisterFilter("wordwrap", filterWordwrap)
 	RegisterFilter("yesno", filterYesno)
+	RegisterFilter("key", filterKey)
 
 	RegisterFilter("float", filterFloat)     // pongo-specific
 	RegisterFilter("integer", filterInteger) // pongo-specific
@@ -924,4 +925,18 @@ func filterYesno(in *Value, param *Value) (*Value, *Error) {
 
 	// no
 	return AsValue(choices[1]), nil
+}
+
+func filterKey(in *Value, param *Value) (*Value, *Error) {
+	if in.IsNil() {
+		return AsValue(nil), nil
+	}
+	if !in.IsMap() {
+		return nil, &Error{
+			Sender:    "filter:key",
+			OrigError: errors.Errorf("You must call filter 'key' only on a map with string keys"),
+		}
+	}
+
+	return in.MapIndex(param.String()), nil
 }
